@@ -1,0 +1,236 @@
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { RootState } from "../../../store";
+import clsx from "clsx";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
+
+/* Components */
+import AddPost from "../../../components/Add-new-post";
+import RightStat from "../../../components/Add-new-post/right-stat";
+import Breadcrumb from "../../../components/Breadcrumb";
+import Comment from "../../../components/Cards/Comment";
+import MoreSettingsIcon from "../../../icons/setting-dots";
+import Layout from "../../../components/Layout";
+import Button from "../../../components/Button";
+
+/* Icons */
+import CreateAtIcon from "../../../icons/created-at-icon";
+import CollapseIcon from "../../../icons/collapse-icon";
+import Posted from "../../../icons/pngs/post-image.png";
+import SendPostBtnIcon from "../../../icons/send-post-button";
+import ReportIcon from "../../../icons/comments-icon/report-icon";
+
+// import { Comments } from "../../../utils/data";
+import API_USERS_POST from "../../../services/Api/post.api.service";
+import ReplyOnComment from 'components/AddReplies/reply-comment';
+import { PostComment } from "types";
+import { Comments } from 'utils/data';
+import useAuth from "../../../hooks/useAuth";
+import PostCommentReply from "components/Cards/PostCommentReply";
+import CommentHolder from '../../../components/Cards/CommentHolder';
+import AddCommentOnComment from "components/AddReplies/comment-reply";
+
+const Replies = () => {
+  const router = useRouter();
+  const { id } = router.query;
+  const isAuthenticated = useAuth();
+
+  const [isRepliesModelOpen, setIsRepliesModelOpen] = useState(false);
+  const [loading, setLoading] = useState(true)
+  const [loadingComments, setLoadingComments] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<PostComment>({
+    comments: [],
+    post: {
+      meta: {
+        createdAt: "",
+        updatedAt: "",
+      },
+      _id: "",
+      community: "",
+      text: "",
+      owner: {
+        _id: "",
+        firstName: "",
+        lastName: "",
+        profileImage: "",
+      },
+      images: [],
+      isDagerous: false,
+      isViewable: true,
+      __v: 0,
+      commentsCount: 0,
+      upvotesCount: 0,
+      downvotesCount: 0,
+    },
+  });
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+  const closeReplyModel = () => setIsRepliesModelOpen(false);
+  const [isDropdownActive, setIsDropdownActive] = useState(false);
+
+useEffect(() => {
+  async function fetchPost() {
+    try {
+      const response = isAuthenticated
+        ? await API_USERS_POST.getAPostById(id as string)
+        : await API_USERS_POST.getAPublicPostById(id as string);
+      setSelectedPost(response.data.data);
+      setLoading(false);
+      setLoadingComments(false)
+    } catch (error) {
+      console.error("Error fetching post:", error);
+    }
+  }
+
+  if (id) {
+    fetchPost();
+  }
+}, [id, isAuthenticated]);
+
+  const created = dayjs(selectedPost.post.meta.createdAt);
+
+  const { owner } = selectedPost.post;
+
+  const handlePostAuthorization = () => {
+    isAuthenticated ? toggleModal() : redirectToLogin();
+  };
+  
+  const toggleModal = () => {
+    setIsModalOpen((prevIsModalOpen) => !prevIsModalOpen);
+  }
+  
+  const redirectToLogin = () => {
+    router.push("/login");
+  }
+
+
+  const handleShowReplyForm = () => {
+    setIsRepliesModelOpen(true);
+  };
+
+  const onePostCard = () => {
+    return (
+      <div>
+        <div className="flex items-center md:mt-2 w-full">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex justify-between items-center">
+              <Image
+                className="w-6 h-6 mr-2 rounded-full"
+                // src={owner.profileImage}
+                src={"https://images.unsplash.com/placeholder-avatars/extra-large.jpg"}
+                alt="Avatar"
+                width={24}
+                height={24}
+              />
+              <h2 className="text-base font-medium text-color">
+                {owner.firstName} {owner.lastName} <strong> - </strong>
+                <span className="text-sm">{created.fromNow()}</span>
+              </h2>
+            </div>
+            <span
+              className="cursor-pointer w-8 h-8 rounded-full flex justify-center items-center hover:bg-[#b79ac917]"
+              onClick={() => setIsDropdownActive(!isDropdownActive)}
+            >
+              <MoreSettingsIcon />
+              {isDropdownActive && (
+                <div className="fixed z-50 gap-4 mt-6  overflow-hidden text-center transition-shadow ease-in-out bg-white rounded-md drop-shadow gap-y-6">
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-x-2 text-[10px] md:text-xs text-color-1000 w-[60px]">
+                      <span className="hidden font-bold cursor-pointer md:inline-block">
+                        Delete
+                      </span>
+                      <ReportIcon />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </span>
+          </div>
+        </div>
+        
+        <Comment
+          handleOpenCommentModal={handleShowReplyForm}
+          imgUrl={"https://images.unsplash.com/placeholder-avatars/extra-large.jpg"}
+          timeAgo={created.fromNow()}
+          message={selectedPost.post.text}
+          upvoteCount={selectedPost.post.upvotesCount}
+          downvoteCount={selectedPost.post.downvotesCount}
+          replyCount={selectedPost.post.commentsCount}
+          selectedPostId={selectedPost.post._id}
+          selectedPost={selectedPost.post}
+          postComments={selectedPost.comments}
+        />
+      </div>
+    );
+  };
+
+  return (
+    <Layout>
+      <>
+        {/* <div className="flex justify-between flex-col md:flex-row md:gap-4 mt-4 text-color-200"> */}
+        <span
+          className="flex font-bold ml-4 w-fit cursor-pointer text-color-100 hover:text-color transition ease-in-out"
+          onClick={() => router.back()}
+        >
+          Go Back
+        </span>
+        <div className="flex justify-between flex-col md:flex-row md:gap-4 text-color-200">
+          <div className="w-full md:w-8/12 md:px-3 bg-white relative">
+            {/* Main Card */}
+            <div className="mt-2 md:mt-2 rounded w-full top-menu-bar-shadow px-6 py-8 border border-[#F1F1f1]">
+              {loading ? "Loading..." : onePostCard()}
+              <br />
+              {/* {selectedPost.comments?.length > 0 && <PostCommentReply />} */}
+              {loadingComments ? <p className="animate-pulse font-semibold text-center text-color-200">Loading comments</p> :
+                (
+                  <div className="my-2">
+                    {selectedPost.comments?.length > 0 && (selectedPost.comments || []).map((comments: any, index: any) => <CommentHolder key={index} commentId={comments._id} replies={comments} />)}
+                  </div>
+                )
+                }
+            </div>
+            {/* Main card ends here */}
+          </div>
+          <RightStat handlePostAuthorization={handlePostAuthorization} />
+        </div>
+        {isModalOpen && (
+          <AddPost
+            isModalOpen={isModalOpen}
+            closeModal={closeModal}
+            value="Create Post"
+            title="Create Post"
+            handleClick={() => {}}
+          />
+        )}
+        {isRepliesModelOpen && (
+          <ReplyOnComment
+            isModalOpen={isRepliesModelOpen}
+            closeModal={closeReplyModel}
+            value="Reply"
+            handleClick={() => {}}
+            currentComment={selectedPost.post}
+          />
+        )}
+       {/*  {isRepliesCommentOpen && (
+          <AddCommentOnComment
+            isModalOpen={isRepliesCommentOpen}
+            closeModal={}
+            value=""
+            title=""
+            handleClick={() => {}}
+            currentComment={selectedPost.post}
+            commentId=""
+          />
+        )} */}
+      </>
+    </Layout>
+  );
+};
+
+export default Replies;

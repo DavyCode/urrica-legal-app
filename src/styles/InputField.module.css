@@ -1,0 +1,121 @@
+.input_field input:disabled {
+  background-color: #d6d8e7 !important;
+  border: 1px solid #d6d8e7;
+}
+
+
+.error {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 5px);
+}
+.error p {
+  display: flex;
+  align-items: center;
+  text-transform: lowercase;
+  color: #ed2e7e;
+  font-size: 12px;
+}
+.error p > svg {
+  margin-right: 5px;
+}
+.slider_card {
+  position: absolute;
+  top: calc(100% + 25px) !important;
+  /* width: 85%;
+  min-width: 270px;
+  max-width: 341px; */
+  padding: 20px;
+  background-color: white;
+  border: 1px solid #eff0f6;
+  border-radius: 12px;
+  z-index: 500;
+  transition: all 0.3s;
+  cursor: initial;
+}
+.slider_card p,
+.slider_card button {
+  font-size: 16px;
+}
+.slider_card h4 {
+  font-weight: bold;
+  font-size: 20px;
+  margin-bottom: 30px;
+}
+
+.min_max {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 30px;
+}
+.min_max .figure {
+  background: #eff0f7;
+  border: 2px solid #5a1cb9;
+  border-radius: 6px;
+  padding: 10px;
+  min-width: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.min_max .tag {
+  color: #a0a3bc;
+  margin-top: 12px;
+}
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40px;
+}
+.buttons > button:first-of-type {
+  color: #a0a3bc;
+  border: none !important;
+  padding: 0;
+  text-align: left;
+  width: 0;
+  font-weight: 700;
+}
+.buttons > button:last-of-type {
+  width: 100px;
+  height: 41px;
+  border-radius: 6px;
+  font-weight: 700;
+  border: none !important;
+}
+.value_bar {
+  margin-bottom: 12px;
+}
+.value_bar p {
+  font-size: 16px;
+  text-align: center;
+  color: #a0a3bc;
+}
+.input_field label span,
+.required {
+  color: red;
+  margin-left: 5px;
+}
+.input_field label {
+  display: flex;
+  font-size: 16px;
+  align-items: center;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+@media screen and (max-width: 750px) {
+  .min_max {
+    display: flex;
+    /* justify-content: space-between; */
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 30px;
+  }
+
+  .slider_card{
+    position: initial;
+  }
+}
