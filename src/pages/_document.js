@@ -14,6 +14,8 @@ export default function Document() {
       <body>
         <Main />
         <NextScript />
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-11BNG481EP"></script>
+        <script async src="/ga.js"></script>
       </body>
     </Html>
   );
